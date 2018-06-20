@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { View, Text, ImageBackground } from "react-native";
 import axios from "axios";
-import { images } from "../images";
 
 class Main extends Component {
   constructor(props) {
@@ -13,7 +12,14 @@ class Main extends Component {
         lon: null
       },
       error: null,
-      data: null,
+      name: "",
+      country: "",
+      temp: "",
+      max_temp: "",
+      min_temp: "",
+      humidity: "",
+      speed_Wind: "",
+      deg_wind: "",
       logo: "",
       weather: ""
     };
@@ -49,7 +55,15 @@ class Main extends Component {
     axios.get(url + queryString).then(res => {
       this.setState({
         data: res.data,
-        weather: res.data.weather[0].description
+        weather: res.data.weather[0].description,
+        name: res.data.name,
+        country: res.data.sys.country,
+        temp: res.data.main.temp,
+        max_temp: res.data.main.temp_max,
+        min_temp: res.data.main.temp_min,
+        humidity: res.data.main.humidity,
+        speed_Wind: res.data.wind.speed,
+        deg_wind: res.data.wind.deg
       });
       this.UpdatePicture();
     });
@@ -89,7 +103,8 @@ class Main extends Component {
         break;
       case "sunny":
         this.setState({
-          logo: "../images/snow.jpg"
+          logo:
+            "https://android.giveawayoftheday.com/wp-content/plugins/gotd_googleplay_plugin/images/2015/07/com.sea.realistic.wallpaper_Screenshot_1436371317.png"
         });
         break;
       case "snow":
@@ -126,7 +141,6 @@ class Main extends Component {
 
   render() {
     const logo = this.state.logo;
-    console.log(toString(logo));
     return (
       <ImageBackground
         source={{ uri: logo }}
@@ -143,8 +157,13 @@ class Main extends Component {
             alignItems: "center"
           }}
         >
-          <Text>Latitude: {this.state.cords.lat}</Text>
+          <Text>Lovation: {this.state.cords.lat}</Text>
           <Text>Longitude: {this.state.cords.lon}</Text>
+          <Text>name: {this.state.name}</Text>
+          <Text>country: {this.state.country}</Text>
+          <Text>temp: {this.state.temp}</Text>
+          <Text>max_temp: {this.state.max_temp}</Text>
+          <Text>min_temp: {this.state.min_temp}</Text>
           {this.state.error ? <Text>Error: {this.state.error}</Text> : null}
         </View>
       </ImageBackground>

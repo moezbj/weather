@@ -59,27 +59,32 @@ class Main extends Component {
     switch (weather) {
       case "clear sky":
         this.setState({
-          logo: "../images/clear-sky.jpg"
+          logo:
+            "https://i.pinimg.com/originals/ab/6c/fe/ab6cfe0cb3bcf0fcab53e0d9d4d8a1b6.jpg"
         });
         break;
       case "few clouds":
         this.setState({
-          logo: "../images/few-clouds.jpg"
+          logo:
+            "https://static.wixstatic.com/media/3ba74f_22aaf5e5d80c409f9537710177b79d96~mv2.jpg/v1/fill/w_430,h_646/3ba74f_22aaf5e5d80c409f9537710177b79d96~mv2.jpg"
         });
         break;
       case "broken clouds":
         this.setState({
-          logo: "../images/broken-clouds.jpg"
+          logo:
+            "https://i.pinimg.com/736x/96/14/93/9614939a6a1da0be11d1c4bcab47f1c8--iphone--wallpaper-mobile-wallpaper.jpg"
         });
         break;
       case "scattered clouds":
         this.setState({
-          logo: "../images/scattered-clouds.jpg"
+          logo:
+            "https://i.pinimg.com/736x/67/f2/d0/67f2d066cfc38ef66462c4219ad1ae9f--cellphone-wallpaper-iphone--wallpaper.jpg"
         });
         break;
       case "light rain":
         this.setState({
-          logo: "../images/rainy.jpg"
+          logo:
+            "https://i.pinimg.com/originals/d7/2e/d5/d72ed5be5345c62f161e34f89d08552d.jpg"
         });
         break;
       case "sunny":
@@ -89,12 +94,14 @@ class Main extends Component {
         break;
       case "snow":
         this.setState({
-          logo: "../images/snow.jpg"
+          logo:
+            "https://i.pinimg.com/736x/2b/7f/80/2b7f80317378ca80fa94c8a14f4c8734--iphone-wallpaper-mobile-wallpaper.jpg"
         });
         break;
       case "windy":
         this.setState({
-          logo: "../images/windy.jpg"
+          logo:
+            "https://i.pinimg.com/564x/ef/17/4b/ef174bb628af61a31ebaef6526a7c002--ornamental-grasses-green-homes.jpg"
         });
         break;
       case "snow with rain":
@@ -104,12 +111,14 @@ class Main extends Component {
         break;
       case "thunderstorm":
         this.setState({
-          logo: "../images/thunderstorm.jpg"
+          logo:
+            "https://s4827.pcdn.co/wp-content/uploads/2014/06/Purple-Storm.jpg"
         });
         break;
       case "lightning":
         this.setState({
-          logo: "../images/thunderstorm.jpg"
+          logo:
+            "https://s4827.pcdn.co/wp-content/uploads/2014/06/Purple-Storm.jpg"
         });
         break;
     }
@@ -120,7 +129,7 @@ class Main extends Component {
     console.log(toString(logo));
     return (
       <ImageBackground
-        source={require("../images/clear-sky.jpg")}
+        source={{ uri: logo }}
         imageStyle={{ resizeMode: "cover" }}
         style={{
           width: "100%",

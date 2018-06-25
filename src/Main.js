@@ -1,6 +1,9 @@
 import React, { Component } from "react";
-import { View, Text, ImageBackground } from "react-native";
+import { View, Text, ImageBackground, Image, StyleSheet } from "react-native";
 import axios from "axios";
+import moment from "moment";
+const day = moment().format("dddd");
+const time = moment().format(" h:mm ");
 
 class Main extends Component {
   constructor(props) {
@@ -18,10 +21,15 @@ class Main extends Component {
       max_temp: "",
       min_temp: "",
       humidity: "",
+      pressure: "",
       speed_Wind: "",
       deg_wind: "",
-      logo: "",
-      weather: ""
+      logo: null,
+      weather: "",
+      icon: null,
+      sunrise: "",
+      sunset: "",
+      degree: "C"
     };
   }
 
@@ -53,17 +61,40 @@ class Main extends Component {
     const queryString = queryParams.join("&");
     const url = "https://fcc-weather-api.glitch.me/api/current?";
     axios.get(url + queryString).then(res => {
+      newsunrise = "";
+      newsunset = "";
+
+      var sunrise = moment
+        .unix(res.data.sys.sunrise)
+
+        .format("hh:mm");
+      var str = sunrise.split();
+      for (let i = 0; i < str.length; i++) {
+        newsunrise = str[i];
+      }
+      var sunset = moment
+        .unix(res.data.sys.sunset)
+
+        .format("hh:mm");
+      var str1 = sunset.split();
+      for (let i = 0; i < str1.length; i++) {
+        newsunset = str1[i];
+      }
       this.setState({
         data: res.data,
         weather: res.data.weather[0].description,
+        icon: res.data.weather[0].icon,
         name: res.data.name,
         country: res.data.sys.country,
-        temp: res.data.main.temp,
+        temp: Math.round(res.data.main.temp),
         max_temp: res.data.main.temp_max,
         min_temp: res.data.main.temp_min,
         humidity: res.data.main.humidity,
+        pressure: res.data.main.pressure,
         speed_Wind: res.data.wind.speed,
-        deg_wind: res.data.wind.deg
+        deg_wind: res.data.wind.deg,
+        sunrise: newsunrise,
+        sunset: newsunset
       });
       this.UpdatePicture();
     });
@@ -138,6 +169,26 @@ class Main extends Component {
         break;
     }
   }
+  CtoF = () => {
+    const temp = this.state.temp;
+    const max_temp = this.state.max_temp;
+    const min_temp = this.state.min_temp;
+    if (this.state.degree === "C")
+      this.setState({
+        temp: (temp * 9) / 5 + 32,
+        max_temp: (max_temp * 9) / 5 + 32,
+        min_temp: (min_temp * 9) / 5 + 32,
+        degree: "F"
+      });
+    else if (this.state.degree === "F") {
+      this.setState({
+        temp: Math.round(((temp - 32) * 5) / 9),
+        max_temp: Math.round(((max_temp - 32) * 5) / 9),
+        min_temp: Math.round(((min_temp - 32) * 5) / 9),
+        degree: "C"
+      });
+    }
+  };
 
   render() {
     const logo = this.state.logo;
@@ -150,21 +201,70 @@ class Main extends Component {
           height: "100%"
         }}
       >
-        <View
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center"
-          }}
-        >
-          <Text>Lovation: {this.state.cords.lat}</Text>
-          <Text>Longitude: {this.state.cords.lon}</Text>
-          <Text>name: {this.state.name}</Text>
-          <Text>country: {this.state.country}</Text>
-          <Text>temp: {this.state.temp}</Text>
-          <Text>max_temp: {this.state.max_temp}</Text>
-          <Text>min_temp: {this.state.min_temp}</Text>
-          {this.state.error ? <Text>Error: {this.state.error}</Text> : null}
+        <View style={styles.maindiv}>
+          <View style={styles.timeDay}>
+            <Text style={styles.countrytxt}>{day}</Text>
+            <Text style={styles.countrytxt}>{time}</Text>
+          </View>
+
+          <View style={styles.infodiv}>
+            <View style={styles.country}>
+              <Text style={styles.countrytxt}>{this.state.name} ,</Text>
+              <Text style={styles.countrytxt}> {this.state.country}</Text>
+            </View>
+            <View style={styles.country}>
+              <Text style={styles.temptxt} onPress={this.CtoF}>
+                {this.state.temp}°
+              </Text>
+            </View>
+            <View style={styles.country}>
+              <Text style={styles.countrytxt}>{this.state.weather}</Text>
+              <Image
+                style={{ width: 50, height: 50 }}
+                source={{
+                  uri: this.state.icon
+                }}
+              />
+            </View>
+            <View style={styles.country}>
+              <Text>
+                <Text style={styles.span}> max_temp: </Text>
+                {this.state.max_temp}°
+              </Text>
+              <Text>
+                <Text style={styles.span}> min_temp: </Text>
+                {this.state.min_temp}°
+              </Text>
+            </View>
+            <View style={styles.country}>
+              <Text>
+                <Text style={styles.span}> Humidity: </Text>
+                {this.state.humidity}
+              </Text>
+              <Text>
+                <Text style={styles.span}> Wind: </Text>
+                {this.state.speed_Wind}
+              </Text>
+              <Text>
+                <Text style={styles.span}> Pressure: </Text>
+                {this.state.pressure}
+              </Text>
+            </View>
+
+            {this.state.error ? <Text>Error: {this.state.error}</Text> : null}
+          </View>
+          <View style={styles.infodiv}>
+            <View>
+              <Text style={styles.countrytxt}>
+                <Text style={styles.span}>Sunrise :</Text>
+                {this.state.sunrise}
+              </Text>
+              <Text style={styles.countrytxt}>
+                <Text style={styles.span}>Sunset :</Text>
+                {this.state.sunset}
+              </Text>
+            </View>
+          </View>
         </View>
       </ImageBackground>
     );
@@ -172,3 +272,37 @@ class Main extends Component {
 }
 
 export default Main;
+const styles = StyleSheet.create({
+  maindiv: {
+    flex: 1,
+    alignItems: "center"
+  },
+  timeDay: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 20,
+    height: 70
+  },
+  infodiv: {
+    backgroundColor: "rgba(0,0,0,0.3)",
+    borderRadius: 4,
+    width: "80%",
+    marginBottom: 20
+  },
+  country: {
+    flexDirection: "row",
+    justifyContent: "center",
+    margin: 5
+  },
+  countrytxt: {
+    fontSize: 20
+  },
+  temptxt: {
+    fontSize: 80
+  },
+  span: {
+    color: "white",
+    fontSize: 14,
+    paddingLeft: 30
+  }
+});

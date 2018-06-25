@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import { View, Text, ImageBackground, Image, StyleSheet } from "react-native";
 import axios from "axios";
 import moment from "moment";
+import { createStackNavigator } from "react-navigation";
+
 const day = moment().format("dddd");
 const time = moment().format(" h:mm ");
 
@@ -36,6 +38,7 @@ class Main extends Component {
   componentDidMount() {
     navigator.geolocation.getCurrentPosition(
       position => {
+        console.log(position);
         this.setState({
           error: null,
           cords: {
@@ -59,45 +62,51 @@ class Main extends Component {
     }
 
     const queryString = queryParams.join("&");
-    const url = "https://fcc-weather-api.glitch.me/api/current?";
-    axios.get(url + queryString).then(res => {
-      newsunrise = "";
-      newsunset = "";
+    console.log(queryString);
+    const url =
+      "http://api.openweathermap.org/data/2.5/forecast?cnt=3&appid=39a3e4d4c97c54a078a92304f5757592&";
+    axios
+      .get(url + queryString)
+      .then(res => {
+        console.log(res, "gdgdgd");
+        newsunrise = "";
+        newsunset = "";
 
-      var sunrise = moment
-        .unix(res.data.sys.sunrise)
+        var sunrise = moment
+          .unix(res.data.sys.sunrise)
 
-        .format("hh:mm");
-      var str = sunrise.split();
-      for (let i = 0; i < str.length; i++) {
-        newsunrise = str[i];
-      }
-      var sunset = moment
-        .unix(res.data.sys.sunset)
+          .format("hh:mm");
+        var str = sunrise.split();
+        for (let i = 0; i < str.length; i++) {
+          newsunrise = str[i];
+        }
+        var sunset = moment
+          .unix(res.data.sys.sunset)
 
-        .format("hh:mm");
-      var str1 = sunset.split();
-      for (let i = 0; i < str1.length; i++) {
-        newsunset = str1[i];
-      }
-      this.setState({
-        data: res.data,
-        weather: res.data.weather[0].description,
-        icon: res.data.weather[0].icon,
-        name: res.data.name,
-        country: res.data.sys.country,
-        temp: Math.round(res.data.main.temp),
-        max_temp: res.data.main.temp_max,
-        min_temp: res.data.main.temp_min,
-        humidity: res.data.main.humidity,
-        pressure: res.data.main.pressure,
-        speed_Wind: res.data.wind.speed,
-        deg_wind: res.data.wind.deg,
-        sunrise: newsunrise,
-        sunset: newsunset
-      });
-      this.UpdatePicture();
-    });
+          .format("hh:mm");
+        var str1 = sunset.split();
+        for (let i = 0; i < str1.length; i++) {
+          newsunset = str1[i];
+        }
+        this.setState({
+          data: res.data,
+          weather: res.data.weather[0].description,
+          icon: res.data.weather[0].icon,
+          name: res.data.name,
+          country: res.data.sys.country,
+          temp: Math.round(res.data.main.temp),
+          max_temp: res.data.main.temp_max,
+          min_temp: res.data.main.temp_min,
+          humidity: res.data.main.humidity,
+          pressure: res.data.main.pressure,
+          speed_Wind: res.data.wind.speed,
+          deg_wind: res.data.wind.deg,
+          sunrise: newsunrise,
+          sunset: newsunset
+        });
+        this.UpdatePicture();
+      })
+      .catch(error => console.log(error));
   }
   UpdatePicture() {
     const weather = this.state.weather;
@@ -213,8 +222,9 @@ class Main extends Component {
               <Text style={styles.countrytxt}> {this.state.country}</Text>
             </View>
             <View style={styles.country}>
+              <Text style={styles.temptxt}>{this.state.temp}°</Text>
               <Text style={styles.temptxt} onPress={this.CtoF}>
-                {this.state.temp}°
+                {this.state.degree}
               </Text>
             </View>
             <View style={styles.country}>
@@ -258,6 +268,13 @@ class Main extends Component {
               <Text style={styles.countrytxt}>
                 <Text style={styles.span}>Sunrise :</Text>
                 {this.state.sunrise}
+                <Image
+                  style={{ width: 50, height: 50 }}
+                  source={{
+                    uri:
+                      "https://www.kisspng.com/png-sunrise-computer-icons-clip-art-sunrise-843491/"
+                  }}
+                />
               </Text>
               <Text style={styles.countrytxt}>
                 <Text style={styles.span}>Sunset :</Text>

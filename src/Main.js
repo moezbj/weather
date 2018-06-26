@@ -3,6 +3,7 @@ import { View, Text, ImageBackground, Image, StyleSheet } from "react-native";
 import axios from "axios";
 import moment from "moment";
 import { createStackNavigator } from "react-navigation";
+import images from "./Images";
 
 const day = moment().format("dddd");
 const time = moment().format(" h:mm ");
@@ -12,7 +13,8 @@ class Main extends Component {
     super(props);
 
     this.state = {
-      cords: {
+      cords: [0, 0],
+      coords: {
         lat: null,
         lon: null
       },
@@ -31,20 +33,24 @@ class Main extends Component {
       icon: null,
       sunrise: "",
       sunset: "",
-      degree: "C"
+      degree: "C",
+      nextDays: []
     };
   }
 
   componentDidMount() {
     navigator.geolocation.getCurrentPosition(
       position => {
-        console.log(position);
         this.setState({
           error: null,
-          cords: {
+          coords: {
             lat: position.coords.latitude,
             lon: position.coords.longitude
-          }
+          },
+          cords: [
+            parseInt(position.coords.latitude),
+            parseInt(position.coords.longitude)
+          ]
         });
         this.requestData();
       },
@@ -55,55 +61,52 @@ class Main extends Component {
 
   requestData() {
     let queryParams = [];
-    for (let i in this.state.cords) {
+    for (let i in this.state.coords) {
       queryParams.push(
-        encodeURIComponent(i) + "=" + encodeURIComponent(this.state.cords[i])
+        encodeURIComponent(i) + "=" + encodeURIComponent(this.state.coords[i])
       );
     }
 
     const queryString = queryParams.join("&");
-    console.log(queryString);
-    const url =
-      "http://api.openweathermap.org/data/2.5/forecast?cnt=3&appid=39a3e4d4c97c54a078a92304f5757592&";
+    const Baseurl = "https://fcc-weather-api.glitch.me/api/current?";
+    axios.get(Baseurl + queryString).then(res => {
+      this.setState({
+        name: res.data.name,
+        country: res.data.sys.country,
+        pressure: res.data.main.pressure
+      });
+    });
+    const id = "?app_id=b862b835&app_key=4f97c244616abbd4d1a336857dcb8a2c";
+    const url = "http://api.weatherunlocked.com/api/forecast/";
     axios
-      .get(url + queryString)
+      .get(url + this.state.cords[0] + "," + this.state.cords[1] + id)
       .then(res => {
-        console.log(res, "gdgdgd");
-        newsunrise = "";
-        newsunset = "";
-
-        var sunrise = moment
-          .unix(res.data.sys.sunrise)
-
-          .format("hh:mm");
-        var str = sunrise.split();
-        for (let i = 0; i < str.length; i++) {
-          newsunrise = str[i];
-        }
-        var sunset = moment
-          .unix(res.data.sys.sunset)
-
-          .format("hh:mm");
-        var str1 = sunset.split();
-        for (let i = 0; i < str1.length; i++) {
-          newsunset = str1[i];
-        }
-        this.setState({
-          data: res.data,
-          weather: res.data.weather[0].description,
-          icon: res.data.weather[0].icon,
-          name: res.data.name,
-          country: res.data.sys.country,
-          temp: Math.round(res.data.main.temp),
-          max_temp: res.data.main.temp_max,
-          min_temp: res.data.main.temp_min,
-          humidity: res.data.main.humidity,
-          pressure: res.data.main.pressure,
-          speed_Wind: res.data.wind.speed,
-          deg_wind: res.data.wind.deg,
-          sunrise: newsunrise,
-          sunset: newsunset
+        console.log(res.data);
+        const nextDays = [];
+        res.data.Days.map((el, i) => {
+          nextDays.push({
+            description: el.Timeframes[0].wx_desc,
+            temp: el.Timeframes[0].temp_c,
+            temp_max: el.temp_max_c,
+            temp_min: el.temp_max_c,
+            icon: el.Timeframes[0].wx_icon
+          });
         });
+
+        this.setState({
+          weather: res.data.Days[0].Timeframes[0].wx_desc,
+          icon: res.data.Days[0].Timeframes[0].wx_icon,
+          temp: Math.round(res.data.Days[0].Timeframes[0].temp_c),
+          max_temp: res.data.Days[0].temp_max_c,
+          min_temp: res.data.Days[0].temp_min_c,
+          humidity: res.data.Days[0].humid_max_pct,
+          speed_Wind: res.data.Days[0].windspd_max_kmh,
+          deg_wind: res.data.Days[0].Timeframes[0].winddir_deg,
+          sunrise: res.data.Days[0].sunrise_time,
+          sunset: res.data.Days[0].sunset_time,
+          nextDays
+        });
+
         this.UpdatePicture();
       })
       .catch(error => console.log(error));
@@ -111,43 +114,43 @@ class Main extends Component {
   UpdatePicture() {
     const weather = this.state.weather;
     switch (weather) {
-      case "clear sky":
+      case "Clear skies":
         this.setState({
           logo:
             "https://i.pinimg.com/originals/ab/6c/fe/ab6cfe0cb3bcf0fcab53e0d9d4d8a1b6.jpg"
         });
         break;
-      case "few clouds":
+      case "Partly cloudy skies":
         this.setState({
           logo:
             "https://static.wixstatic.com/media/3ba74f_22aaf5e5d80c409f9537710177b79d96~mv2.jpg/v1/fill/w_430,h_646/3ba74f_22aaf5e5d80c409f9537710177b79d96~mv2.jpg"
         });
         break;
-      case "broken clouds":
+      case "Partly cloudy skies":
         this.setState({
           logo:
             "https://i.pinimg.com/736x/96/14/93/9614939a6a1da0be11d1c4bcab47f1c8--iphone--wallpaper-mobile-wallpaper.jpg"
         });
         break;
-      case "scattered clouds":
+      case "Cloudy skies":
         this.setState({
           logo:
             "https://i.pinimg.com/736x/67/f2/d0/67f2d066cfc38ef66462c4219ad1ae9f--cellphone-wallpaper-iphone--wallpaper.jpg"
         });
         break;
-      case "light rain":
+      case "Light rain":
         this.setState({
           logo:
             "https://i.pinimg.com/originals/d7/2e/d5/d72ed5be5345c62f161e34f89d08552d.jpg"
         });
         break;
-      case "sunny":
+      case "Sunny skies":
         this.setState({
           logo:
             "https://android.giveawayoftheday.com/wp-content/plugins/gotd_googleplay_plugin/images/2015/07/com.sea.realistic.wallpaper_Screenshot_1436371317.png"
         });
         break;
-      case "snow":
+      case "Moderate snow":
         this.setState({
           logo:
             "https://i.pinimg.com/736x/2b/7f/80/2b7f80317378ca80fa94c8a14f4c8734--iphone-wallpaper-mobile-wallpaper.jpg"
@@ -159,18 +162,18 @@ class Main extends Component {
             "https://i.pinimg.com/564x/ef/17/4b/ef174bb628af61a31ebaef6526a7c002--ornamental-grasses-green-homes.jpg"
         });
         break;
-      case "snow with rain":
+      case "Light snow showers":
         this.setState({
           logo: "../images/snow.jpg"
         });
         break;
-      case "thunderstorm":
+      case "Moderate or heavy rain with thunder":
         this.setState({
           logo:
             "https://s4827.pcdn.co/wp-content/uploads/2014/06/Purple-Storm.jpg"
         });
         break;
-      case "lightning":
+      case "Patchy light snow with thunder":
         this.setState({
           logo:
             "https://s4827.pcdn.co/wp-content/uploads/2014/06/Purple-Storm.jpg"
@@ -282,6 +285,18 @@ class Main extends Component {
               </Text>
             </View>
           </View>
+
+          <View style={styles.nextContainer}>
+            {this.state.nextDays.map((el, i) => {
+              return (
+                <View style={styles.nextday} key={i}>
+                  <Text>{el.description}</Text>
+                  <Image source={images[el.icon]} />
+                  <Text>{el.temp}</Text>
+                </View>
+              );
+            })}
+          </View>
         </View>
       </ImageBackground>
     );
@@ -321,5 +336,17 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 14,
     paddingLeft: 30
+  },
+  nextday: {
+    width: "20%",
+    margin: 10
+  },
+  nextContainer: {
+    backgroundColor: "rgba(0,0,0,0.3)",
+    borderRadius: 4,
+    width: "80%",
+    marginBottom: 20,
+    flexDirection: "row",
+    flexWrap: "wrap"
   }
 });

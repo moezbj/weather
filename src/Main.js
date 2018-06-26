@@ -3,7 +3,7 @@ import { View, Text, ImageBackground, Image, StyleSheet } from "react-native";
 import axios from "axios";
 import moment from "moment";
 import { createStackNavigator } from "react-navigation";
-import images from "./Images";
+import images from "./images";
 
 const day = moment().format("dddd");
 const time = moment().format(" h:mm ");

@@ -1,5 +1,12 @@
 import React, { Component } from "react";
-import { View, Text, ImageBackground, Image, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  ImageBackground,
+  Image,
+  StyleSheet,
+  ScrollView
+} from "react-native";
 import axios from "axios";
 import moment from "moment";
 import { createStackNavigator } from "react-navigation";
@@ -81,18 +88,20 @@ class Main extends Component {
     axios
       .get(url + this.state.cords[0] + "," + this.state.cords[1] + id)
       .then(res => {
-        console.log(res.data);
         const nextDays = [];
-        res.data.Days.map((el, i) => {
+        const arr = res.data.Days;
+        var array = arr.shift();
+        console.log(arr);
+        arr.map((el, i) => {
           nextDays.push({
             description: el.Timeframes[0].wx_desc,
             temp: el.Timeframes[0].temp_c,
             temp_max: el.temp_max_c,
             temp_min: el.temp_max_c,
-            icon: el.Timeframes[0].wx_icon
+            icon: el.Timeframes[0].wx_icon,
+            date: el.date
           });
         });
-
         this.setState({
           weather: res.data.Days[0].Timeframes[0].wx_desc,
           icon: res.data.Days[0].Timeframes[0].wx_icon,
@@ -213,91 +222,97 @@ class Main extends Component {
           height: "100%"
         }}
       >
-        <View style={styles.maindiv}>
-          <View style={styles.timeDay}>
-            <Text style={styles.countrytxt}>{day}</Text>
-            <Text style={styles.countrytxt}>{time}</Text>
-          </View>
-
-          <View style={styles.infodiv}>
-            <View style={styles.country}>
-              <Text style={styles.countrytxt}>{this.state.name} ,</Text>
-              <Text style={styles.countrytxt}> {this.state.country}</Text>
-            </View>
-            <View style={styles.country}>
-              <Text style={styles.temptxt}>{this.state.temp}°</Text>
-              <Text style={styles.temptxt} onPress={this.CtoF}>
-                {this.state.degree}
-              </Text>
-            </View>
-            <View style={styles.country}>
-              <Text style={styles.countrytxt}>{this.state.weather}</Text>
-              <Image
-                style={{ width: 50, height: 50 }}
-                source={{
-                  uri: this.state.icon
-                }}
-              />
-            </View>
-            <View style={styles.country}>
-              <Text>
-                <Text style={styles.span}> max_temp: </Text>
-                {this.state.max_temp}°
-              </Text>
-              <Text>
-                <Text style={styles.span}> min_temp: </Text>
-                {this.state.min_temp}°
-              </Text>
-            </View>
-            <View style={styles.country}>
-              <Text>
-                <Text style={styles.span}> Humidity: </Text>
-                {this.state.humidity}
-              </Text>
-              <Text>
-                <Text style={styles.span}> Wind: </Text>
-                {this.state.speed_Wind}
-              </Text>
-              <Text>
-                <Text style={styles.span}> Pressure: </Text>
-                {this.state.pressure}
-              </Text>
+        <ScrollView>
+          <View style={styles.maindiv}>
+            <View style={styles.timeDay}>
+              <Text style={styles.countrytxt}>{day}</Text>
+              <Text style={styles.countrytxt}>{time}</Text>
             </View>
 
-            {this.state.error ? <Text>Error: {this.state.error}</Text> : null}
-          </View>
-          <View style={styles.infodiv}>
-            <View>
-              <Text style={styles.countrytxt}>
-                <Text style={styles.span}>Sunrise :</Text>
-                {this.state.sunrise}
+            <View style={styles.infodiv}>
+              <View style={styles.country}>
+                <Text style={styles.countrytxt}>{this.state.name} ,</Text>
+                <Text style={styles.countrytxt}> {this.state.country}</Text>
+              </View>
+              <View style={styles.country}>
+                <Text style={styles.temptxt}>{this.state.temp}°</Text>
+                <Text style={styles.temptxt} onPress={this.CtoF}>
+                  {this.state.degree}
+                </Text>
+              </View>
+              <View style={styles.country}>
+                <Text style={styles.countrytxt}>{this.state.weather}</Text>
                 <Image
                   style={{ width: 50, height: 50 }}
                   source={{
-                    uri:
-                      "https://www.kisspng.com/png-sunrise-computer-icons-clip-art-sunrise-843491/"
+                    uri: this.state.icon
                   }}
                 />
-              </Text>
-              <Text style={styles.countrytxt}>
-                <Text style={styles.span}>Sunset :</Text>
-                {this.state.sunset}
-              </Text>
+              </View>
+              <View style={styles.country}>
+                <Text>
+                  <Text style={styles.span}> max_temp: </Text>
+                  {this.state.max_temp}°
+                </Text>
+                <Text>
+                  <Text style={styles.span}> min_temp: </Text>
+                  {this.state.min_temp}°
+                </Text>
+              </View>
+              <View style={styles.country}>
+                <Text>
+                  <Text style={styles.span}> Humidity: </Text>
+                  {this.state.humidity}
+                </Text>
+                <Text>
+                  <Text style={styles.span}> Wind: </Text>
+                  {this.state.speed_Wind}
+                </Text>
+                <Text>
+                  <Text style={styles.span}> Pressure: </Text>
+                  {this.state.pressure}
+                </Text>
+              </View>
+
+              {this.state.error ? <Text>Error: {this.state.error}</Text> : null}
+            </View>
+            <View style={styles.infodiv}>
+              <View style={styles.sun}>
+                <Text style={styles.countrytxt}>
+                  <Text style={styles.span}>Sunrise :</Text>
+                  {this.state.sunrise}
+                  <Image
+                    style={{ width: 50, height: 50 }}
+                    source={{
+                      uri:
+                        "https://www.kisspng.com/png-sunrise-computer-icons-clip-art-sunrise-843491/"
+                    }}
+                  />
+                </Text>
+                <Text style={styles.countrytxt}>
+                  <Text style={styles.span}>Sunset :</Text>
+                  {this.state.sunset}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.nextContainer}>
+              {this.state.nextDays.map((el, i) => {
+                return (
+                  <View style={styles.nextday} key={i}>
+                    <Text>{el.date}</Text>
+                    <Text>{el.description}</Text>
+                    <Image
+                      source={images[el.icon]}
+                      style={{ width: 50, height: 50 }}
+                    />
+                    <Text>{el.temp}°</Text>
+                  </View>
+                );
+              })}
             </View>
           </View>
-
-          <View style={styles.nextContainer}>
-            {this.state.nextDays.map((el, i) => {
-              return (
-                <View style={styles.nextday} key={i}>
-                  <Text>{el.description}</Text>
-                  <Image source={images[el.icon]} />
-                  <Text>{el.temp}</Text>
-                </View>
-              );
-            })}
-          </View>
-        </View>
+        </ScrollView>
       </ImageBackground>
     );
   }
@@ -338,8 +353,9 @@ const styles = StyleSheet.create({
     paddingLeft: 30
   },
   nextday: {
-    width: "20%",
-    margin: 10
+    margin: 10,
+    alignItems: "center",
+    justifyContent: "center"
   },
   nextContainer: {
     backgroundColor: "rgba(0,0,0,0.3)",
@@ -347,6 +363,14 @@ const styles = StyleSheet.create({
     width: "80%",
     marginBottom: 20,
     flexDirection: "row",
-    flexWrap: "wrap"
+    flexWrap: "wrap",
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  sun: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    margin: 5
   }
 });
